@@ -1,0 +1,558 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>WebCalc</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type="text/javascript">
+
+//Jquery to make the page fade in when it is loaded
+$(document).ready(function()
+{
+        $(".loading-bar").fadeOut(2000, function() {
+      //    $("calculator").fadeIn(2000);
+
+        });
+});
+
+//initialise vairables and URL's
+//Access-Control-Allow-Origin: *
+
+let value = 0;
+let x = 0;
+let y = 0;
+let operation = '';
+
+let addURL = "http://add.40175607.qpc.hal.davecutting.uk"
+let minusURL = "http://sub.40175607.qpc.hal.davecutting.uk"
+let multURL = "http://mult.40175607.qpc.hal.davecutting.uk/"
+let divURL = "http://div.40175607.qpc.hal.davecutting.uk"
+let modURL = "http://mod.40175607.qpc.hal.davecutting.uk"
+let powerURL = "http://power.40175607.qpc.hal.davecutting.uk"
+let proxyURL = "http://proxy.40175607.qpc.hal.davecutting.uk"
+let monitoringURL ="http://monitoring.40175607.qpc.hal.davecutting.uk"
+
+//Display function used to set the value variable
+function Display()
+{
+  try {
+    document.getElementById('display').value = value;
+  }
+  catch(err) {
+    console.log(err.message)
+  }
+
+}
+
+//Clear function used to set the calculator variables back to 0 or ''
+function Clear()
+{
+    value = 0;
+    x = 0;
+    y = 0;
+    operation = '';
+    Display();
+}
+
+//Numclick function calculates the numer of clicks done on the calculator
+function NumClick(n)
+{
+    if (value == 0)
+        value = n;
+    else
+    {
+        value *= 10;
+        value += n;
+    }
+
+    Display();
+}
+
+//Plus function used for the addition function
+function Plus()
+{
+    // if we have an outstanding operation resolve it
+    if (operation != '')
+        Equals();
+
+    x = value;
+    value = 0;
+    operation = '+';
+
+    //Display function called with the updated variable values
+    Display();
+}
+
+//Minus function used for the subtraction function
+function Minus()
+{
+    // if we have an outstanding operation resolve it
+    if (operation != '')
+        Equals();
+
+    x = value;
+    value = 0;
+    operation = '-';
+
+    //Display function called with the updated variable values
+    Display();
+}
+
+//Multiply function used for the multiplication function
+function Multiply()
+{
+    // if we have an outstanding operation resolve it
+    if (operation != '')
+        Equals();
+
+    x = value;
+    value = 0;
+    operation = '*';
+
+    //Display function called with the updated variable values
+    Display();
+}
+
+//Div function used for the divide function
+function Div()
+{
+    // if we have an outstanding operation resolve it
+    if (operation != '')
+        Equals();
+
+    x = value;
+    value = 0;
+    operation = '/';
+
+    //Display function called with the updated variable values
+    Display();
+}
+
+//Mod function used for the modulus function
+function Mod()
+{
+    // if we have an outstanding operation resolve it
+    if (operation != '')
+        Equals();
+
+    x = value;
+    value = 0;
+    operation = '%';
+
+    //Display function called with the updated variable values
+    Display();
+}
+
+//Power function used for the power function
+function Power()
+{
+    // if we have an outstanding operation resolve it
+    if (operation != '')
+        Equals();
+
+    x = value;
+    value = 0;
+    operation = '^';
+
+    //Display function called with the updated variable values
+    Display();
+}
+
+
+
+//Equals function used to calculate and display the result from the
+//mathmatical functions by getting the result of the calculation from
+//each function microservice
+function Equals()
+{
+    //if no operation value then return
+    if (operation == '')
+        return;
+
+    y = value;
+
+    //If operation is + then call the add microservice
+    if (operation == '+')
+    {
+        //let ans = x+y; // nah - too easy :)
+
+        //create a new XMLHttpRequest object
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var j = JSON.parse(this.response);
+                x=0;
+                y=0;
+                operation='';
+                value = j.answer;
+                Display();
+            }
+
+
+        };
+
+      //do a http request to get the result of the addtion from the add microservice function.
+      //try, catch statement used for error handling if there is an error in opening the function
+      //url link, the error cause is then outputted to the console if there one occurs.
+
+      try {
+        xhttp.open("GET",addURL+"/?x="+x+"&y="+y);
+      //  document.body.className = "loading"     //used for asynchronous calls
+}     catch(err) {
+        console.log("Error when opening add URL")
+      }
+    //  document.body.className = "";
+
+      //"loading" element is called, which is an ajax spinner which helps with asynchronous calls being
+      //blocked or actions happening whilist waiting on a response from the back to front-end when service is called.
+
+      try {
+        xhttp.send();
+}     catch(err) {
+        console.log(err)
+
+}
+        return;
+    }
+
+    //If operation is - then call the minus microservice
+    else if (operation == '-')
+    {
+        //create a new XMLHttpRequest object
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var j = JSON.parse(this.response);
+                x=0;
+                y=0;
+                operation='';
+                value = j.answer;
+                Display();
+            }
+            else if (this.readyState !=4 && this.status != 200) {
+                ErrorHandling(this.status)
+            }
+
+
+        };
+
+      try {
+        xhttp.open("GET",proxyURL+"/?x="+x+"&y="+y+"&operator=-");
+    }  catch(err) {
+        console.log(err)
+    }
+      //  document.body.className = "loading"    //used for asynchronous calls
+      try {
+        xhttp.send();
+      } catch(err) {
+         console.log(err)
+      }
+
+      //  document.body.className = "";
+
+        return;
+
+    }
+
+    //If operation is * then call the multiply microservice
+    else if (operation == '*')
+    {
+        //create a new XMLHttpRequest object
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var j = JSON.parse(this.response);
+                x=0;
+                y=0;
+                operation='';
+                value = j.answer;
+                Display();
+            }
+            else if (this.readyState !=4 && this.status != 200) {
+                ErrorHandling(this.status)
+          }
+
+
+        };
+        try {
+          xhttp.open("GET",proxyURL+"/?x="+x+"&y="+y+"&operator=*");
+      }  catch(err) {
+          console.log(err)
+      }
+      //  document.body.className = "loading"      //used for asynchronous calls
+
+        try {
+          xhttp.send();
+        } catch(err) {
+           console.log(err)
+        }
+        /*document.body.className = "";*/
+
+        return;
+    }
+
+    //If operation is / then call the divide microservice
+    else if (operation == '/')
+    {
+        //create a new XMLHttpRequest object
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var j = JSON.parse(this.response);
+                x=0;
+                y=0;
+                operation='';
+                value = j.Answer;
+                Display();
+            }
+            else if (this.readyState !=4 && this.status != 200) {
+                ErrorHandling(this.status)
+          }
+
+        };
+
+      try {
+        xhttp.open("GET",proxyURL+"/?x="+x+"&y="+y+"&operator=/");
+    }  catch(err) {
+        console.log(err)
+    }
+      //  document.body.className = "loading"        //used for asynchronous calls
+
+        try {
+          xhttp.send();
+        } catch(err) {
+           console.log(err)
+        }
+        /*document.body.className = "";*/
+
+        return;
+    }
+
+    //If operation is ^ then call the power microservice
+    else if (operation == '^')
+    {
+        //create a new XMLHttpRequest object
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var j = JSON.parse(this.response);
+                x=0;
+                y=0;
+                operation='';
+                value = j.answer;
+                Display();
+            }
+            else if (this.readyState !=4 && this.status != 200) {
+                ErrorHandling(this.status)
+          }
+
+        };
+
+      try {
+        xhttp.open("GET",proxyURL+"/?x="+x+"&y="+y+"&operator=^");
+    }  catch(err) {
+        console.log(err);
+    }
+      //  document.body.className = "loading"        //used for asynchronous calls
+
+        try {
+          xhttp.send();
+        } catch(err) {
+           console.log(err)
+        }
+
+        /*document.body.className = "";*/
+
+        return;
+    }
+
+    //If operation is % then call the modulus microservice
+    else if (operation == '%')
+        {
+            //create a new XMLHttpRequest object
+            let xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var j = JSON.parse(this.response);
+                    x=0;
+                    y=0;
+                    operation='';
+                    value = j.answer;
+                    Display();
+                }
+                else if (this.readyState !=4 && this.status != 200) {
+                    ErrorHandling(this.status)
+              }
+
+            };
+
+          try {
+            xhttp.open("GET",proxyURL+"/?x="+x+"&y="+y+"&operator=%");
+        }  catch(err) {
+            console.log(err)
+        }
+          //  document.body.className = "loading"          //used for asynchronous calls
+
+            try {
+              xhttp.send();
+            } catch(err) {
+               console.log(err)
+            }
+
+            /*document.body.className = "";*/
+
+            return;
+        }
+
+            //return if operation is not equal to any of the above
+            return;
+
+  }
+
+//function for error handling, take http status code as parameter
+function ErrorHandling(status_code)
+  {
+    //switch statement used with the http status code
+    switch(status_code) {
+
+      case 400:
+        console.log("Status Code 400 - Bad Request");
+        console.log(status_code);
+
+      case 404:
+        console.log("Status Code 404  - Page Not Found");
+        console.log(status_code);
+
+      case 408:
+        console.log("Status Code 408  - Request Timeout");
+        console.log(status_code);
+
+      case 502:
+        console.log("Status Code 502  - Bad Gateway Error");
+        console.log(status_code);
+
+      case 503:
+        console.log("Status Code 503  - Service Unavailable Error");
+        console.log(status_code);
+
+      case 504:
+        console.log("Status Code 504  - Gatway Timeout Error");
+        console.log(status_code);
+      }
+  }
+
+</script>
+
+<style type="text/css">
+body  {
+    font-size: 150%;
+    font-family: monospace;
+}
+
+#logo
+{
+    font-family: Calibri, sans-serif;
+    font-weight: lighter;
+    color: #505050;
+    margin: 0.5em;
+}
+
+#calculator
+{
+    text-align: center;
+    margin-top: 1em;
+}
+
+#display {
+    font-size: 100%;
+    padding: 0.2em;
+    margin: 0.2em;
+    font-family: monospace;
+    letter-spacing: 0.1em;
+}
+
+
+.calc1 {
+    border: solid #d0d0d0 1px;
+    background-color: #f0f0f0;
+    padding: 1.5em;
+    margin: 1em;
+}
+</style>
+
+</head>
+<body>
+<div id="calculator">
+    <div id="logo">
+        Casidave Calcutron
+    </div>
+    <div>
+        <input type="text" id="display" readonly="1" value="">
+    </div>
+    <div>
+        <button class="calc1" onclick="Clear();">C</button>
+        <button class="calc1" onclick="Multiply();">*</button>
+        <button class="calc1" onclick="Power();">^</button>
+        <button class="calc1" onclick="Div();">/</button>
+    </div>
+    <div>
+        <button class="calc1" onclick="NumClick(7);">7</button>
+        <button class="calc1" onclick="NumClick(8);">8</button>
+        <button class="calc1" onclick="NumClick(9);">9</button>
+        <button class="calc1" onclick="Plus();">+</button>
+    </div>
+    <div>
+        <button class="calc1" onclick="NumClick(4);">4</button>
+        <button class="calc1" onclick="NumClick(5);">5</button>
+        <button class="calc1" onclick="NumClick(6);">6</button>
+        <button class="calc1" onclick="Minus();">-</button>
+    </div>
+    <div>
+        <button class="calc1" onclick="NumClick(1);">1</button>
+        <button class="calc1" onclick="NumClick(2);">2</button>
+        <button class="calc1" onclick="NumClick(3);">3</button>
+        <button class="calc1" onclick="Equals();">=</button>
+    </div>
+    <div>
+        <button class="calc1" onclick="NumClick(0);">0</button>
+        <button class="calc1" onclick="Mod();">%</button>
+        <button class="calc1" onclick="">?</button>
+        <button class="calc1" onclick="">?</button>
+    </div>
+</div>
+
+    <div class ="loading-bar"></div>
+
+    <style>
+        .loading-bar {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('http://i.stack.imgur.com/FhHRx.gif');
+            background-position: 50% 50%;
+            background-color: rgba(255,255,255,0.8);
+            background-repeat: no-repeat;
+        }
+        body.loading {
+          overflow: hidden;
+        }
+        body.loading .loading-bar {
+          display: block;
+        }
+
+
+
+    </style>
+</body>
+
+<script type="text/javascript">
+    value = 123;
+    Display();
+</script>
+
+</html>
