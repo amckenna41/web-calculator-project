@@ -1,0 +1,9 @@
+image: golang:latest
+
+stages:
+    - build
+    - test
+
+test:app:
+  script:
+  - go test -v
