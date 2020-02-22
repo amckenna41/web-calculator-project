@@ -1,0 +1,12 @@
+image: python:3-alpine
+
+before_script:
+  - python -V               # Print out python version for debugging
+  - pip install Flask       # install Flask web framework
+  - pip install flask flask_cors    #install CORS Flask dependancy to implemenet CORS in function
+
+  
+  
+test:app:
+  script:
+  - python -m unittest test_mod.py   #call the multiply testing file
